@@ -1,4 +1,4 @@
-# GENERALIZED END-TO-END LOSS FOR SPEAKER VERIFICATION
+# Generalized End-To-End Loss For Speaker Verification
 
 This is my attempt at implementing the paper [Generalized End-To-End Loss For Speaker Verification](https://arxiv.org/pdf/1710.10467.pdf)
 
