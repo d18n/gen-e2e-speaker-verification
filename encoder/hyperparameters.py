@@ -1,23 +1,23 @@
 # Mel-filterbank
-mel_window_length = 25 # In milliseconds
-mel_window_step = 10 # In milliseconds
-mel_n_channels = 40
+MEL_WINDOW_LENGTH = 25 # In milliseconds
+MEL_WINDOW_STEP = 10 # In milliseconds
+MEL_N_CHANNELS = 40
 
 # Model
-hidden_nodes = 768
-projection_size = 256
-num_layers = 3
+HIDDEN_NODES = 768
+PROJECTION_SIZE = 256
+NUM_LAYERS = 3
 
-speakers_per_batch = 64
-utterances_per_speaker = 10
+SPEAKERS_PER_BATCH = 64
+UTTERANCES_PER_SPEAKER = 10
 
-initial_learning_rate = 0.01
-steps_per_halving = 30_000_000
+INITIAL_LEARNING_RATE = 0.01
+STEPS_PER_HALVING = 30_000_000
 
-l2_norm_clip = 3
+L2_NORM_CLIP = 3
 
-projection_gradient_scale = 0.5
+PROJECTION_GRADIENT_SCALE = 0.5
 
 # Apparently this helped smooth convergence
-scaling_factor_loss_w_init = 10
-scaling_factor_loss_b_init = -5
+SIMILARITY_WEIGHT_INIT = 10.
+SIMILARITY_BIAS_INIT = -5.

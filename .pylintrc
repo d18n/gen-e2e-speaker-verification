@@ -1,0 +1,8 @@
+[TYPECHECK]
+
+# List of members which are set dynamically and missed by pylint inference
+# system, and so shouldn't trigger E1101 when accessed. Python regular
+# expressions are accepted.
+# Added from answer to this github issue
+# https://github.com/pytorch/pytorch/issues/701#issuecomment-378048755
+generated-members=numpy.*,torch.*

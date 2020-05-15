@@ -16,10 +16,9 @@ Find a dataset with a fair number of speakers / utterances per speaker. Probably
 
 Once an initial version of this model works well, I'd like to start going through and indexing creative commons videos, and creating datasets with more
 speakers. Idea would be to use the current model to split audio up into clips that it thinks are produced by a given speaker, would set a relatively high
-confidence threshold. Anything below that, we would hold onto, and use as a validation set to see if we were able to improve the accuracy of the model.
+confidence threshold to auto-accept. Anything below that, we would hold onto, and use as a validation set to see if we were able to improve the accuracy of the model.
 Anything that it was still struggling with, we can manually label, re-train, and repeat. Hopefully once trained on the initial set of languages, we can
-perform a similar process for other languages, that aren't very well represented in data sets like Mozilla's open voice. Mozilla has a goal of 10,000
-hours, we could hopefully achieve that.
+perform a similar process for other languages, that aren't very well represented in data sets like Mozilla's open voice.
 
 Once we have this encoder trained well, I'd like to use it in a similar method as was used in 
 [Real-Time-Voice-Cloning](https://github.com/CorentinJ/Real-Time-Voice-Cloning). It seems like if we used this speaker embedding in a text-to-speech
