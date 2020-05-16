@@ -11,8 +11,9 @@ from encoder.hyperparameters import *
 # Probably going to want to store these somewhere else
 
 class SpeakerEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, device, loss_device):
         super().__init__()
+        self.loss_device = loss_device
 
         # TODO: The paper mentions that they use projection as referenced in
         # https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43905.pdf
@@ -21,17 +22,17 @@ class SpeakerEncoder(nn.Module):
         self.lstm = nn.LSTM(input_size=MEL_N_CHANNELS,
                             hidden_size=HIDDEN_NODES,
                             num_layers=NUM_LAYERS,
-                            batch_first=True)
+                            batch_first=True).to(device)
 
         self.linear = nn.Linear(in_features=HIDDEN_NODES,
-                                out_features=PROJECTION_SIZE)
+                                out_features=PROJECTION_SIZE).to(device)
 
-        self.relu = nn.ReLU()
+        self.relu = nn.ReLU().to(device)
 
-        self.similarity_weight = nn.Parameter(torch.Tensor([SIMILARITY_WEIGHT_INIT]))
-        self.similarity_bias = nn.Parameter(torch.Tensor([SIMILARITY_BIAS_INIT]))
+        self.similarity_weight = nn.Parameter(torch.Tensor([SIMILARITY_WEIGHT_INIT])).to(loss_device)
+        self.similarity_bias = nn.Parameter(torch.Tensor([SIMILARITY_BIAS_INIT])).to(loss_device)
 
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.CrossEntropyLoss().to(loss_device)
 
     def do_gradient_ops(self):
         # Section 3. Experiments of the paper mentions that the l2-norm of gradient is clipped at 3
@@ -43,9 +44,9 @@ class SpeakerEncoder(nn.Module):
 
         clip_grad_norm_(self.parameters(), L2_NORM_CLIP, norm_type=2)
 
-    def forward(self, utterances):
+    def forward(self, utterances, hidden_init=None):
         # We only care about the hidden state of the lstm
-        _, (hidden, _) = self.lstm(utterances)
+        _, (hidden, _) = self.lstm(utterances, hidden_init)
 
         # Grab the last hidden state
         embeddings_raw = self.relu(self.linear(hidden[-1]))
@@ -72,7 +73,7 @@ class SpeakerEncoder(nn.Module):
         centroids_excl /= (utterances_per_speaker - 1)
         centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
 
-        sim_matrix = torch.zeros(speakers_per_batch, utterances_per_speaker, speakers_per_batch)
+        sim_matrix = torch.zeros(speakers_per_batch, utterances_per_speaker, speakers_per_batch).to(self.loss_device)
 
         mask_matrix = 1 - np.eye(speakers_per_batch, dtype=np.int)
 
@@ -92,7 +93,7 @@ class SpeakerEncoder(nn.Module):
         sim_matrix = sim_matrix.reshape((speakers_per_batch * utterances_per_speaker, speakers_per_batch))
 
         ground_truth = np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
-        target = torch.from_numpy(ground_truth).long()
+        target = torch.from_numpy(ground_truth).long().to(self.loss_device)
         loss = self.loss_fn(sim_matrix, target)
 
         with torch.no_grad():
