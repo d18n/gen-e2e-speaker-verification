@@ -10,6 +10,7 @@ from encoder.hyperparameters import *
 
 # Probably going to want to store these somewhere else
 
+
 class SpeakerEncoder(nn.Module):
     def __init__(self, device, loss_device):
         super().__init__()
@@ -29,8 +30,10 @@ class SpeakerEncoder(nn.Module):
 
         self.relu = nn.ReLU().to(device)
 
-        self.similarity_weight = nn.Parameter(torch.Tensor([SIMILARITY_WEIGHT_INIT])).to(loss_device)
-        self.similarity_bias = nn.Parameter(torch.Tensor([SIMILARITY_BIAS_INIT])).to(loss_device)
+        self.similarity_weight = nn.Parameter(
+            torch.Tensor([SIMILARITY_WEIGHT_INIT])).to(loss_device)
+        self.similarity_bias = nn.Parameter(
+            torch.Tensor([SIMILARITY_BIAS_INIT])).to(loss_device)
 
         self.loss_fn = nn.CrossEntropyLoss().to(loss_device)
 
@@ -51,8 +54,9 @@ class SpeakerEncoder(nn.Module):
         # Grab the last hidden state
         embeddings_raw = self.relu(self.linear(hidden[-1]))
 
-        #L2 normalize the output
-        embeddings = embeddings_raw / torch.norm(embeddings_raw, dim=2, keepdim=True)
+        # L2 normalize the output
+        embeddings = embeddings_raw / \
+            torch.norm(embeddings_raw, dim=1, keepdim=True)
 
         return embeddings
 
@@ -67,20 +71,24 @@ class SpeakerEncoder(nn.Module):
         speakers_per_batch, utterances_per_speaker = embeds.shape[:2]
 
         centroids_incl = torch.mean(embeds, dim=1, keepdim=True)
-        centroids_incl = centroids_incl.clone() / torch.norm(centroids_incl, dim=2, keepdim=True)
+        centroids_incl = centroids_incl.clone() / torch.norm(centroids_incl,
+                                                             dim=2, keepdim=True)
 
         centroids_excl = torch.sum(embeds, dim=1, keepdim=True) - embeds
         centroids_excl /= (utterances_per_speaker - 1)
-        centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl, dim=2, keepdim=True)
+        centroids_excl = centroids_excl.clone() / torch.norm(centroids_excl,
+                                                             dim=2, keepdim=True)
 
-        sim_matrix = torch.zeros(speakers_per_batch, utterances_per_speaker, speakers_per_batch).to(self.loss_device)
+        sim_matrix = torch.zeros(
+            speakers_per_batch, utterances_per_speaker, speakers_per_batch).to(self.loss_device)
 
         mask_matrix = 1 - np.eye(speakers_per_batch, dtype=np.int)
 
         for j in range(speakers_per_batch):
-            mask = np.where(mask_matrix[j])[0] 
+            mask = np.where(mask_matrix[j])[0]
             # Cosine similarity of l2 normalized vectors is simply the dot product
-            sim_matrix[mask, :, j] = (embeds[mask] * centroids_incl[j]).sum(dim=2)
+            sim_matrix[mask, :, j] = (
+                embeds[mask] * centroids_incl[j]).sum(dim=2)
             sim_matrix[j, :, j] = (embeds[j] * centroids_excl[j]).sum(dim=1)
 
         sim_matrix = sim_matrix * self.similarity_weight + self.similarity_bias
@@ -90,14 +98,17 @@ class SpeakerEncoder(nn.Module):
         speakers_per_batch, utterances_per_speaker = embeds.shape[:2]
 
         sim_matrix = self.similarity_matrix(embeds)
-        sim_matrix = sim_matrix.reshape((speakers_per_batch * utterances_per_speaker, speakers_per_batch))
+        sim_matrix = sim_matrix.reshape(
+            (speakers_per_batch * utterances_per_speaker, speakers_per_batch))
 
-        ground_truth = np.repeat(np.arange(speakers_per_batch), utterances_per_speaker)
+        ground_truth = np.repeat(
+            np.arange(speakers_per_batch), utterances_per_speaker)
         target = torch.from_numpy(ground_truth).long().to(self.loss_device)
         loss = self.loss_fn(sim_matrix, target)
 
         with torch.no_grad():
-            inv_argmax = lambda i: np.eye(1, speakers_per_batch, i, dtype=np.int)[0]
+            def inv_argmax(i): return np.eye(
+                1, speakers_per_batch, i, dtype=np.int)[0]
             labels = np.array([inv_argmax(i) for i in ground_truth])
             preds = sim_matrix.detach().cpu().numpy()
 

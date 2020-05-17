@@ -76,7 +76,7 @@ class Visualizations:
         dataset_string += "<b>Speakers</b>: %s\n" % len(dataset.speakers)
         dataset_string += "\n" + dataset.get_logs()
         dataset_string += dataset_string.replace("\n", "<br>")
-        self.vis.text(dataset_string, opts={"title:", "Dataset"})
+        self.vis.text(dataset_string, opts={"title": "Dataset"})
 
     def log_implementation(self, params):
         if self.disabled:

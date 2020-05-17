@@ -26,24 +26,7 @@ model, hopefully the model would be able to apply some sorts of "filters" to bet
 this seems to make sense to me. Would be cool to see if we could beat state-of-the-art with such a technique. Honestly though, I don't really know
 what text-to-speech architectures look like, so I'm not even 100% sure where we would feed in the embedding.
 
-## Data preparation
+## Data
 
-Write scripts to normalize the data and get it into a format usable by you. This should really be a single 
-function that accepts a path to a wav file, and returns the input to the neural net. I think librosa will do this for you
-
-## Model construction
-
-Recreate the model described in the paper
-
-## Training
-
-Train the model on the data. Would like to figure out how to use tensorboard as well, or at least something that would allow me to monitor training remotely
-
-## Inference
-
-Test out the model and see how it performs
-
-## Review
-
-Write some sort of a blog post documenting all of this, and just put it out there. Probably a decent way to start getting feedback. For
-the next model, maybe try recording some videos documenting the process.
+Training seemed to be succesful. It looks like this repo doesn't have train/eval/test setup, so I'll implement that tomorrow as well as add
+the multi-language data from mozilla open voice

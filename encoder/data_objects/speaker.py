@@ -1,8 +1,16 @@
+"""
+Contains classes and functions relavant to speakers
+"""
+
 from pathlib import Path
 from encoder.data_objects.random_cycler import RandomCycler
 from encoder.data_objects.utterance import Utterance
 
 class Speaker:
+    """
+    Contains speaker info such as the name of the speaker, collection of utterances, and
+    where to find those utterances
+    """
     def __init__(self, root: Path):
         self.root = root
         self.name = root.name
@@ -34,6 +42,4 @@ class Speaker:
 
         utterances = self.utterance_cycler.sample(count)
 
-        a = [(u,) + u.random_partial(n_frames) for u in utterances]
-
-        return a
+        return [(u,) + u.random_partial(n_frames) for u in utterances]
