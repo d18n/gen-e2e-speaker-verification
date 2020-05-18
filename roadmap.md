@@ -29,4 +29,21 @@ what text-to-speech architectures look like, so I'm not even 100% sure where we 
 ## Data
 
 Training seemed to be succesful. It looks like this repo doesn't have train/eval/test setup, so I'll implement that tomorrow as well as add
-the multi-language data from mozilla open voice
+the multi-language data from mozilla common voice
+
+I'll be doing training on data from 10 languages selected from the mozilla common voice data set
+
+ar - arabic
+de - german
+en - english
+es - spanish
+fr - french
+it - italian
+ja - japanese
+nl - dutch
+pt - portugese
+ru - russian
+
+I suspect that an issue that may come up in training will be that voice embeddings will cluster by language, which would make translation of a voice
+from one language to another more difficult. It may be interesting to introduce more components to the loss function using additional labels.
+Loss would encourage speakers with similar labels to cluster together, while still maintaining distance from each other (e.g. things like age and gender)
